@@ -1,0 +1,15 @@
+# Default sdkconfig parameters to use the OTA
+# partition table layout, with a 4MB flash size
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_TWO_OTA=y
+
+# Wi-Fi credentials (PoC convenience, same trade-off as the Zephyr build -
+# see notas_estagio.md). REDACTED for version control - fill in locally
+# before building, or override in a local sdkconfig (not versioned).
+CONFIG_EXAMPLE_WIFI_SSID="CHANGE_ME_SSID"
+CONFIG_EXAMPLE_WIFI_PASSWORD="CHANGE_ME_PASSWORD"
+CONFIG_EXAMPLE_CONNECT_WIFI=y
+
+# Update with your machine's LAN IP (see notas_estagio.md for how the server
+# side is set up).
+CONFIG_EXAMPLE_FIRMWARE_UPG_URL="http://CHANGE_ME_IP:8070/native_ota_example.bin"

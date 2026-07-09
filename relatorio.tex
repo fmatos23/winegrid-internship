@@ -1,0 +1,123 @@
+\documentclass[a4paper,12pt]{article}
+
+% Pacotes para suporte a Português e formatação
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\geometry{margin=2.5cm}
+
+% Configuração para blocos de código
+\lstset{
+    basicstyle=\ttfamily\small,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    captionpos=b
+}
+
+\begin{document}
+
+\title{Relatório de Estágio: Avaliação de Plataformas de Gestão de Dispositivos ESP32}
+\author{Francisco José Nogueira da Rocha Matos}
+\date{\today}
+
+\maketitle
+
+\section{Introdução}
+Este documento descreve as atividades realizadas no âmbito do estágio na Watgrid, focando-se na avaliação de plataformas de desenvolvimento para o hardware ESP32, com particular ênfase na capacidade de atualização remota de firmware (OTA -- \textit{Over-The-Air}), requisito central da plataforma de gestão de dispositivos em avaliação. Foram avaliadas duas plataformas: o RTOS Zephyr e o SDK nativo ESP-IDF da Espressif.
+
+\section{Configuração do Ambiente de Desenvolvimento}
+Foi estabelecido um ambiente de trabalho utilizando o VS Code. As principais ações incluíram:
+\begin{itemize}
+    \item Configuração de tarefas automatizadas (\texttt{tasks.json}) para compilação (\texttt{west build}) e gravação (\texttt{west flash}) de firmware, no caso do Zephyr.
+    \item Gestão do ambiente virtual Python (\texttt{zephyr-env}) para isolamento de dependências.
+    \item Ativação de um ambiente ESP-IDF (v5.5.1) já instalado, para a segunda plataforma avaliada.
+\end{itemize}
+
+\section{Plataforma 1: Zephyr RTOS}
+
+\subsection{Validação de Conectividade}
+O objetivo desta fase foi demonstrar a capacidade de um dispositivo ESP32, a correr Zephyr, integrar-se numa rede sem fios e obter conectividade IP.
+
+A configuração da stack de rede foi realizada via \texttt{prj.conf}, ativando \texttt{CONFIG\_NETWORKING} e \texttt{CONFIG\_NET\_SHELL}. A validação foi realizada via \textit{Shell} (UART), utilizando os comandos \texttt{wifi connect -s "SSID" -p "PASS" -k 1} (ligação WPA2-PSK) e \texttt{net iface} (verificação de endereço DHCP).
+
+\subsection{Desafios Encontrados}
+\begin{itemize}
+    \item \textbf{Gestão de Binários:} Necessidade de importar bibliotecas de RF (\textit{blobs}) da Espressif.
+    \item \textbf{Configuração de Segurança Wi-Fi:} Necessidade de especificar explicitamente o método de gestão de chaves (\texttt{-k 1}).
+    \item \textbf{Ligação automática no arranque:} esta versão do Zephyr (3.7.0) não possui subsistema de credenciais Wi-Fi persistentes. Foi implementada uma ligação automática programática (\texttt{net\_mgmt} com \texttt{NET\_REQUEST\_WIFI\_CONNECT}) para evitar a necessidade de reconfiguração manual a cada reinício.
+    \item \textbf{Bug de deteção silenciosa:} a opção \texttt{CONFIG\_NET\_CONNECTION\_MANAGER}, necessária para que a aplicação aguardasse corretamente pela disponibilidade de rede antes de iniciar operações, não estava ativa. Por se tratar de uma verificação em tempo de compilação (\texttt{IS\_ENABLED}), o compilador eliminava silenciosamente o bloco de código relevante, sem qualquer aviso, causando comportamento incorreto de dificil diagnóstico.
+\end{itemize}
+
+\subsection{Atualização Remota de Firmware (OTA)}
+Foram avaliadas duas arquiteturas distintas de OTA, ambas assentes no mecanismo de \textit{dual-slot} do \texttt{MCUboot}: a imagem de firmware corrente ocupa uma partição primária, enquanto uma nova imagem é escrita numa partição secundária; no arranque seguinte, o \texttt{MCUboot} decide se aplica a atualização pendente.
+
+\subsubsection{MCUboot + mcumgr (transporte série)}
+Nesta abordagem, o \texttt{mcumgr} foi utilizado como protocolo de transporte para envio da imagem de firmware através da porta série, complementando o \texttt{MCUboot}, que gere a decisão de arranque entre partições.
+
+\textbf{Resultado:} o ciclo completo de atualização (envio da imagem, confirmação, reinício) foi validado com sucesso.
+
+\textbf{Limitação identificada:} a configuração de fábrica da Espressif para o \texttt{MCUboot} no ESP32 opera em modo \texttt{upgrade-only} -- a atualização é aplicada de forma direta e permanente, sem fase de teste prévio, sem mecanismo de \textit{rollback} automático. Uma tentativa de ativar o modo de \textit{swap} com possibilidade de reversão (\texttt{swap-using-scratch}) resultou em falha crítica do \textit{bootloader} (ciclo de reinício).
+
+\textbf{Observação relevante ao caso de uso:} este mecanismo depende de ligação por cabo série, não refletindo o cenário de operação real de um dispositivo em campo.
+
+\subsubsection{LwM2M (transporte Wi-Fi)}
+Nesta abordagem, foi implementado um cliente LwM2M (\textit{Lightweight Machine-to-Machine}) sobre Wi-Fi, com o servidor Leshan (\textit{Eclipse Foundation}) a correr localmente. O protocolo LwM2M expõe um objeto \textit{standard} dedicado a atualizações de firmware (\textit{Object 5 -- Firmware Update}), através do qual a imagem é transferida por blocos via CoAP e escrita na partição secundária.
+
+\textbf{Resultados obtidos:} ligação Wi-Fi automática e registo estável do cliente no servidor Leshan validados. Receção e escrita parcial de blocos de firmware confirmadas nos registos, validando a correção da implementação do mecanismo de receção.
+
+\textbf{Falha crítica identificada:} o dispositivo apresenta uma exceção fatal (\textit{illegal instruction}) de forma consistente durante a escrita da imagem na memória flash, sempre que esta ocorre em simultâneo com atividade da interface Wi-Fi. A hipótese técnica é de contenção no acesso à \textit{cache} de instruções do ESP32, da qual o próprio controlador Wi-Fi depende para execução de código. Foram tentadas três mitigações sucessivas (\textit{buffers} de rede maiores, \textit{stack} maior, bloqueio de interrupções durante a escrita), sem resolução completa. A atualização nunca foi concluída com sucesso nos testes realizados nesta plataforma.
+
+\subsection{Diagnóstico Complementar}
+Por sugestão do orientador, e antes de se concluir tratar-se de uma limitação da plataforma, foram eliminadas hipóteses alternativas: incompatibilidade de segurança Wi-Fi (confirmado WPA2, não WPA3, via inspeção direta do ponto de acesso), MTU anómalo (confirmado valor padrão de 1500 bytes) e configuração de \textit{clock} da flash (valor padrão de 40MHz, sem erros reportados). Adicionalmente, a falha ocorria sempre exatamente no mesmo ponto lógico (fronteiras de 512 bytes no buffer interno de escrita), um padrão de repetibilidade típico de uma condição de corrida em software, não de instabilidade de rede.
+
+\section{Plataforma 2: ESP-IDF (nativo)}
+Dada a limitação encontrada na secção anterior, foi avaliado o SDK nativo da Espressif (ESP-IDF v5.5.1) como segunda plataforma, com base no exemplo oficial \texttt{native\_ota\_example}.
+
+\subsection{Mecanismo de OTA}
+Ao contrário do LwM2M (modelo \textit{push}), o ESP-IDF utiliza um modelo \textit{pull}: o dispositivo descarrega ativamente a imagem de um servidor HTTP/HTTPS. O esquema de partições é mais robusto que o do MCUboot, com três partições de aplicação (\texttt{factory}, \texttt{ota\_0}, \texttt{ota\_1}) e uma partição dedicada (\texttt{otadata}) que regista qual deve arrancar a seguir. O mecanismo inclui controlo de versão nativo (previne ciclos de atualização infinitos) e suporte documentado a \textit{rollback} automático (\texttt{CONFIG\_BOOTLOADER\_APP\_ROLLBACK\_ENABLE}), com uma janela de diagnóstico no primeiro arranque de uma imagem nova.
+
+\subsection{Resultado: Atualização Bem-Sucedida}
+Utilizando um servidor HTTP local e a mesma rede Wi-Fi (\texttt{Watgrid Guest}) da secção anterior, a atualização completa (aproximadamente 915KB) foi transferida e escrita com sucesso, \textbf{sem qualquer falha}, com a interface Wi-Fi ativa durante toda a transferência -- o mesmo cenário que causava falha consistente na plataforma Zephyr. O dispositivo reiniciou de forma limpa e arrancou com a nova versão do firmware, confirmada por \textit{hash} SHA-256 distinto.
+
+\textbf{Implicação:} este resultado, obtido com o mesmo hardware e a mesma rede da secção 3.3.2, constitui evidência forte de que a falha anteriormente identificada não resulta de uma limitação do módulo ESP32 nem da rede local, mas sim de uma lacuna específica na implementação/coordenação entre escrita de flash e o controlador Wi-Fi no \textit{port} do Zephyr para este hardware.
+
+\subsection{Esforço de Integração}
+O ambiente já se encontrava instalado, exigindo apenas a resolução de um conflito de versão do pacote \texttt{setuptools}. O exemplo compilou, foi gravado e executou corretamente à primeira tentativa, sem as dificuldades de configuração de \textit{devicetree}/Kconfig observadas na plataforma Zephyr.
+
+\section{Síntese Comparativa}
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Critério} & \textbf{MCUboot+mcumgr} & \textbf{LwM2M (Zephyr)} & \textbf{ESP-IDF nativo} \\
+\hline
+Transporte & Série & Wi-Fi & Wi-Fi \\
+\hline
+Conclusão da atualização & Sim & Não & Sim \\
+\hline
+\textit{Rollback} automático & Não & Não testado & Documentado, por confirmar \\
+\hline
+Reflete caso de uso real & Não & Sim & Sim \\
+\hline
+Esforço de integração & Alto & Alto & Baixo \\
+\hline
+\end{tabular}
+\end{center}
+
+\section{Trabalho Futuro}
+\begin{itemize}
+    \item Testar o mecanismo de \textit{rollback} automático do ESP-IDF (\texttt{CONFIG\_BOOTLOADER\_APP\_ROLLBACK\_ENABLE}).
+    \item Avaliar Secure Boot e provisionamento de credenciais no ESP-IDF.
+    \item Avaliação da atualização via protocolo HTTP simples sobre Zephyr (terceira arquitetura originalmente identificada), embora de prioridade reduzida face aos resultados obtidos.
+    \item Caso se pretenda retomar a via LwM2M no futuro, investigar a causa raiz da falha de escrita em flash concorrente com Wi-Fi no Zephyr antes de qualquer outro investimento nessa via.
+\end{itemize}
+
+\section{Conclusão Preliminar}
+Com base nos resultados obtidos, o ESP-IDF nativo apresenta-se como a plataforma mais promissora para o caso de uso da Watgrid: suporta atualização remota fiável sobre Wi-Fi, com esquema de partições e \textit{rollback} mais maduros, e um esforço de integração significativamente menor que o Zephyr. O Zephyr mantém vantagens de portabilidade (suporte multi-fabricante) que podem ser relevantes caso exista intenção de diversificar o hardware no futuro, mas exigiu um esforço de \textit{debugging} substancialmente maior para um resultado funcionalmente inferior no critério mais crítico (OTA fiável sobre Wi-Fi).
+
+\end{document}
