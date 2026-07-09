@@ -14,3 +14,7 @@ leshan-server-demo.jar
 # Python
 __pycache__/
 *.pyc
+
+# Personal notes/conclusions - kept local only, not pushed
+notas_estagio.md
+criterios_avaliacao_plataformas.md
