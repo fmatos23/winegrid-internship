@@ -1,0 +1,20 @@
+/*
+ * Prova de conceito: declara um RN2483 no UART1 do esp32_devkitc_wroom
+ * (pinos já definidos ao nível da board; aqui só se ativa e ajusta a
+ * velocidade para os 57600 baud que o RN2483 espera).
+ */
+/ {
+	aliases {
+		lora0 = &rn2483_0;
+	};
+};
+
+&uart1 {
+	status = "okay";
+	current-speed = <57600>;
+
+	rn2483_0: rn2483_0 {
+		compatible = "microchip,rn2483";
+		status = "okay";
+	};
+};

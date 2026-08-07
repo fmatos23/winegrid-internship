@@ -1,4 +1,7 @@
 /*
+ * Origem: exemplo oficial do Zephyr (samples/net/lwm2m_client/src/led.c),
+ * não modificado nesta colaboração.
+ *
  * Copyright (c) 2022 Nordic Semiconductor
  *
  * SPDX-License-Identifier: Apache-2.0

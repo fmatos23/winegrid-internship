@@ -1,4 +1,12 @@
 /*
+ * Origem: baseado no exemplo oficial do Zephyr
+ * (samples/net/lwm2m_client/src/lwm2m-client.c, ver copyright abaixo).
+ * A ligação automática a Wi-Fi (wifi_auto_connect() e a integração com o
+ * Connection Manager à volta dela) foi acrescentada nesta colaboração
+ * (Claude) - o exemplo original não tem suporte a Wi-Fi automático nesta
+ * versão do Zephyr. O resto (registo de objetos LwM2M, arranque do
+ * cliente) é essencialmente do exemplo original.
+ *
  * Copyright (c) 2017 Linaro Limited
  * Copyright (c) 2017-2019 Foundries.io
  *

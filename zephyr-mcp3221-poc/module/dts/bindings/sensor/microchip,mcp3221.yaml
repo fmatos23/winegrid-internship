@@ -1,0 +1,21 @@
+description: |
+  Microchip MCP3221 single-channel 12-bit I2C ADC.
+
+  The MCP3221 has no configuration registers: a plain I2C read of 2 bytes
+  returns the latest 12-bit conversion result (the top 4 bits of the first
+  byte are always 0). The I2C address is fixed in silicon per part suffix
+  (e.g. 0x4D for the MCP3221A5T-E/OT variant) and must match the physical
+  part used.
+
+compatible: "microchip,mcp3221"
+
+include: ["i2c-device.yaml", "sensor-device.yaml"]
+
+properties:
+  vref-millivolts:
+    type: int
+    default: 3300
+    description: |
+      Reference voltage (in mV) used to convert the raw 12-bit reading into
+      a voltage. The MCP3221 has no internal reference - Vref equals Vdd.
+      Defaults to 3300 mV, matching the ESP32's 3.3V supply.

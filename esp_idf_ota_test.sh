@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Origem: escrito de raiz nesta colaboração (Claude), não copiado de nenhum
+# repositório.
 # Build, flash and test native OTA (ESP-IDF) on esp32_devkitc_wroom
 # Usage: ./esp_idf_ota_test.sh [build|server|flash|bump|all]
 # Default: all

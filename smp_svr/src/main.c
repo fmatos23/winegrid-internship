@@ -1,4 +1,8 @@
 /*
+ * Origem: exemplo oficial do Zephyr (samples/subsys/mgmt/mcumgr/smp_svr),
+ * não modificado nesta colaboração - só a configuração de build/overlay à
+ * volta dele (fora deste ficheiro) foi ajustada para o hardware usado.
+ *
  * Copyright (c) 2012-2014 Wind River Systems, Inc.
  * Copyright (c) 2020 Prevas A/S
  *

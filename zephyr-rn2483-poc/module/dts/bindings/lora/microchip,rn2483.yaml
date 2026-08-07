@@ -1,0 +1,10 @@
+description: |
+  Microchip RN2483 LoRa/LoRaWAN module with AT-style, plain-text command
+  interface over UART (57600 8N1). Unlike bare Semtech transceivers
+  (SX126x/SX127x, natively supported by Zephyr's drivers/lora/), this module
+  has its own onboard MCU/radio and is controlled entirely through text
+  commands - not SPI registers. No in-tree Zephyr driver exists for it.
+
+compatible: "microchip,rn2483"
+
+include: uart-device.yaml

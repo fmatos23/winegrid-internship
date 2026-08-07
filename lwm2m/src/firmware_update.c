@@ -1,4 +1,12 @@
 /*
+ * Origem: baseado no exemplo oficial do Zephyr
+ * (samples/net/lwm2m_client/src/firmware_update.c, ver copyright abaixo),
+ * cujo Object 5 (Firmware Update) vinha como placeholder sem ligação real
+ * ao MCUboot. A lógica de escrita real na partição secundária
+ * (flash_img_init()/flash_img_buffered_write()), o disparo do upgrade
+ * (boot_request_upgrade()) e o diagnóstico/correção do bug de OTA foram
+ * escritos/reescritos nesta colaboração (Claude).
+ *
  * Copyright (c) 2022 Nordic Semiconductor
  *
  * SPDX-License-Identifier: Apache-2.0
@@ -83,20 +91,15 @@ static int firmware_block_received_cb(uint16_t obj_inst_id, uint16_t res_id,
 		dfu_started = true;
 	}
 
-	/* Crash mitigation: on ESP32, an actual SPI flash write/erase briefly
-	 * suspends flash-cache access, which the CPU also needs to fetch
-	 * instructions (including Wi-Fi driver ISR code) from. If a Wi-Fi
-	 * interrupt fires mid-write and its handler isn't entirely IRAM-
-	 * resident, the CPU faults trying to fetch from the paused cache
-	 * ("illegal instruction", garbage PC) - reproduced reliably here: the
-	 * crash lands exactly on flash_img's internal buffer-flush boundary
-	 * (every IMG_BLOCK_BUF_SIZE=512 bytes). Locking interrupts around the
-	 * write is a blunt fix - it starves Wi-Fi/other IRQs for the write's
-	 * duration - but confirms/works around the race.
+	/* No irq_lock() workaround needed here: the crash this used to cause
+	 * (flash write + Wi-Fi ISR -> illegal instruction) was Zephyr issue
+	 * #77952 - esp_intr_noniram_disable() was never being called during
+	 * flash ops on 3.7.0, a regression from 3.6. Fixed upstream by PR
+	 * #78121 (soc/espressif/esp32/soc.c + hal_espressif bump), applied
+	 * locally to this checkout. Verified: full ~680KB image over Wi-Fi,
+	 * zero crashes, clean MCUboot permanent swap (see notas_estagio.md).
 	 */
-	unsigned int irq_key = irq_lock();
 	ret = flash_img_buffered_write(&dfu_ctx, data, data_len, last_block);
-	irq_unlock(irq_key);
 	if (ret) {
 		LOG_ERR("flash_img_buffered_write failed: %d", ret);
 		dfu_started = false;

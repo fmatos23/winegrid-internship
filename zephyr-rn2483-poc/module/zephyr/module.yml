@@ -1,0 +1,7 @@
+name: rn2483
+
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    dts_root: .

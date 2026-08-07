@@ -1,0 +1,12 @@
+# Copyright (c) 2026 Francisco Matos
+# SPDX-License-Identifier: Apache-2.0
+
+config MCP3221
+	bool "Microchip MCP3221 I2C ADC"
+	default y
+	depends on DT_HAS_MICROCHIP_MCP3221_ENABLED
+	select I2C
+	help
+	  Enable the out-of-tree driver for the Microchip MCP3221
+	  single-channel 12-bit I2C ADC. There is no in-tree Zephyr
+	  driver for this chip.

@@ -1,0 +1,7 @@
+name: mcp3221
+
+build:
+  cmake: .
+  kconfig: Kconfig
+  settings:
+    dts_root: .

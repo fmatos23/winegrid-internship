@@ -1,0 +1,13 @@
+# Copyright (c) 2026 Francisco Matos
+# SPDX-License-Identifier: Apache-2.0
+
+config LORA_RN2483
+	bool "Microchip RN2483 LoRa module (AT-style UART commands)"
+	default y
+	depends on DT_HAS_MICROCHIP_RN2483_ENABLED
+	select LORA
+	help
+	  Out-of-tree driver for the Microchip RN2483 LoRa/LoRaWAN module.
+	  There is no in-tree Zephyr driver for this exact module (only for
+	  bare Semtech transceivers, or Reyax's AT-command modules via
+	  drivers/lora/rylrxxx.c).

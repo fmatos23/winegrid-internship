@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Origem: escrito de raiz nesta colaboração (Claude), não copiado de nenhum
+# repositório - orquestra os exemplos oficiais MCUboot/smp_svr já presentes
+# no projeto (ver os próprios ficheiros para a origem deles).
 # Build, flash and test MCUboot + smp_svr (mcumgr OTA) on esp32_devkitc_wroom/esp32/procpu
 # Usage: ./esp32_ota_test.sh [mcuboot|app|test|update|all]
 # Default: all

@@ -1,0 +1,34 @@
+# Private config options for the Zephyr + ThingsBoard PoC
+
+mainmenu "Zephyr ThingsBoard MQTT client"
+
+if WIFI
+config APP_WIFI_SSID
+	string "Wi-Fi SSID to auto-connect to at boot"
+	default ""
+
+config APP_WIFI_PSK
+	string "Wi-Fi password (WPA2-PSK) for APP_WIFI_SSID"
+	default ""
+endif # WIFI
+
+config TB_BROKER_HOSTNAME
+	string "ThingsBoard MQTT broker hostname"
+	default "mqtt.eu.thingsboard.cloud"
+
+config TB_BROKER_PORT
+	string "ThingsBoard MQTT broker port (mqtts/TLS)"
+	default "8883"
+
+config TB_PROVISION_KEY
+	string "ThingsBoard provision device key"
+	default "CHANGE_ME_PROVISION_KEY"
+	help
+	  Shared across every device of this Device Profile - not a
+	  per-device secret (same mechanism/value as esp-idf-thingsboard).
+
+config TB_PROVISION_SECRET
+	string "ThingsBoard provision device secret"
+	default "CHANGE_ME_PROVISION_SECRET"
+
+source "Kconfig.zephyr"

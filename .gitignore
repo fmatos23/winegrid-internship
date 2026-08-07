@@ -3,6 +3,18 @@ esp-idf-ota/build/
 esp-idf-ota/sdkconfig
 build_*/
 
+# sdkconfig files hold real secrets entered via `idf.py menuconfig`
+# (Wi-Fi password, platform provisioning keys) - never commit these
+esp-idf-thingsboard/build/
+esp-idf-thingsboard/sdkconfig
+esp-idf-azure-dps/build/
+esp-idf-azure-dps/sdkconfig
+esp-idf-mcp3221-poc/build/
+esp-idf-mcp3221-poc/sdkconfig
+mongoose-os-demo-c/build/
+esp-rainmaker/
+esp-rainmaker/build/
+
 # Large third-party artifacts that can be regenerated (see notas_estagio.md
 # for the exact clone/build commands used)
 leshan-src/

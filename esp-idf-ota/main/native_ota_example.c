@@ -1,4 +1,10 @@
-/* OTA example
+/* Origem: exemplo oficial do ESP-IDF v5.5.1
+ * (examples/system/ota/native_ota_example/main/native_ota_example.c),
+ * copiado para este projeto essencialmente sem alterações - a única
+ * diferença é `version.txt` (usado para os testes de OTA reais desta
+ * avaliação, incrementado a cada versão publicada).
+ *
+ * OTA example
 
    This example code is in the Public Domain (or CC0 licensed, at your option.)
 
@@ -278,7 +284,7 @@ static bool diagnostic(void)
 void app_main(void)
 {
     ESP_LOGI(TAG, "OTA example app_main start");
-
+    
     uint8_t sha_256[HASH_LEN] = { 0 };
     esp_partition_t partition;
 

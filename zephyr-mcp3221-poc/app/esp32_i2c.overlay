@@ -1,0 +1,11 @@
+/*
+ * Prova de conceito: declara um MCP3221 no barramento I2C0 do
+ * esp32_devkitc_wroom (SDA=GPIO21, SCL=GPIO22, já ativo por omissão na
+ * board). Endereço 0x4D corresponde à variante MCP3221A5T-E/OT.
+ */
+&i2c0 {
+	mcp3221_0: mcp3221@4d {
+		compatible = "microchip,mcp3221";
+		reg = <0x4d>;
+	};
+};

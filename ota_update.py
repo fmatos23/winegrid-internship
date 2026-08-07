@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Push a new signed image to the ESP32 over mcumgr/serial.
+"""Origem: escrito de raiz nesta colaboração (Claude), não copiado de nenhum
+repositório (usa a biblioteca de terceiros `smpclient` para o protocolo
+mcumgr, essa sim uma dependência externa, não código copiado para aqui).
+
+Push a new signed image to the ESP32 over mcumgr/serial.
 
 Usage: python3 ota_update.py [image_path] [serial_port] [--try-test-mode]
 

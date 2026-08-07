@@ -1,3 +1,5 @@
+# Origem: exemplo oficial do ESP-IDF v5.5.1 (bundled com o
+# native_ota_example), não modificado nesta colaboração.
 # SPDX-FileCopyrightText: 2022-2025 Espressif Systems (Shanghai) CO LTD
 # SPDX-License-Identifier: Unlicense OR CC0-1.0
 import http.server

@@ -1,0 +1,35 @@
+# Broker: ThingsBoard Cloud, EU region (confirm in the ThingsBoard "Connect
+# device" > MQTT dialog, region may differ e.g. eu/us/ap). mqtts:// (TLS,
+# port 8883) instead of the plaintext mqtt://:1883 used in earlier testing -
+# see notas_estagio.md for why that was flagged as a security gap.
+CONFIG_BROKER_URL="mqtts://mqtt.eu.thingsboard.cloud:8883"
+
+# Use ESP-IDF's built-in trusted CA bundle (same one used for HTTPS/OTA) to
+# verify the broker's TLS certificate.
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+
+# Device provisioning credentials (Profiles -> Device profiles -> default ->
+# Device provisioning -> "Allow to create new devices"). Shared by every
+# device of this profile, not per-unit - the actual per-device access token
+# is issued automatically on first boot and persisted to NVS from then on.
+# REDACTED for version control - fill in locally before building.
+CONFIG_TB_PROVISION_KEY="CHANGE_ME_PROVISION_KEY"
+CONFIG_TB_PROVISION_SECRET="CHANGE_ME_PROVISION_SECRET"
+
+# Wi-Fi credentials (same trade-off as the other PoCs - see notas_estagio.md).
+# REDACTED for version control - fill in locally before building.
+CONFIG_EXAMPLE_WIFI_SSID="CHANGE_ME_SSID"
+CONFIG_EXAMPLE_WIFI_PASSWORD="CHANGE_ME_PASSWORD"
+CONFIG_EXAMPLE_CONNECT_WIFI=y
+
+# OTA needs a two-slot partition table (factory + ota_0 + ota_1 + otadata),
+# same layout used in esp-idf-ota/.
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+CONFIG_PARTITION_TABLE_TWO_OTA=y
+
+# Bootloader-level rollback support, same as esp-idf-ota/ - a new image boots
+# in a "pending verify" state; if it's never confirmed healthy (crash, hang,
+# watchdog) the bootloader reverts to the last known-good image on the next
+# reset. Requires a cable reflash once (bootloader-level option, OTA can't
+# change it).
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y

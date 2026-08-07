@@ -1,0 +1,43 @@
+menu "Azure IoT DPS Configuration"
+
+    config AZURE_DPS_ID_SCOPE
+        string "DPS ID Scope"
+        default "CHANGE_ME_ID_SCOPE"
+        help
+            From the DPS instance's Overview page in the Azure Portal
+            (watgrid-dps -> Overview -> ID Scope).
+
+    config AZURE_DPS_REGISTRATION_ID
+        string "DPS Registration ID"
+        default "esp32-winegrid"
+        help
+            Must match the Registration ID configured on an Individual
+            Enrollment in the DPS instance (Settings -> Manage enrollments) -
+            or, in Group Enrollment mode, is simply this device's chosen
+            unique identity within the group (any string, not pre-registered
+            anywhere in advance).
+
+    config AZURE_DPS_USE_GROUP_ENROLLMENT
+        bool "Use Group Enrollment (derive per-device key from a shared group key)"
+        default n
+        help
+            Off (default): AZURE_DPS_SYMMETRIC_KEY below is used directly as
+            this device's own key, matching an Individual Enrollment.
+            On: AZURE_DPS_SYMMETRIC_KEY is instead treated as the *group's*
+            key (from a Group Enrollment), and this device derives its own
+            key locally as HMAC-SHA256(groupKey, AZURE_DPS_REGISTRATION_ID) -
+            the same derivation Azure performs server-side to verify it,
+            without ever needing a per-device credential provisioned in
+            advance. Lets many devices of the same model share one secret,
+            each proving a distinct identity.
+
+    config AZURE_DPS_SYMMETRIC_KEY
+        string "DPS Symmetric Key (base64) - individual device key, or group key if AZURE_DPS_USE_GROUP_ENROLLMENT is on"
+        default "CHANGE_ME_PRIMARY_KEY"
+        help
+            Primary Key shown on the Individual/Group Enrollment after
+            creating it. Used locally to sign SAS tokens (HMAC-SHA256) -
+            never sent over the network as-is. Treat as a secret: only ever
+            stored in sdkconfig (gitignored), never hardcoded in source.
+
+endmenu

@@ -1,0 +1,1 @@
+rsource "drivers/lora/rn2483/Kconfig"

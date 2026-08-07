@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Origem: escrito de raiz nesta colaboração (Claude), não copiado de nenhum
+# repositório.
 # Build and flash the LwM2M client (Wi-Fi) on esp32_devkitc_wroom/esp32/procpu
 # Usage: ./lwm2m_test.sh [build|flash|all]
 # Default: all

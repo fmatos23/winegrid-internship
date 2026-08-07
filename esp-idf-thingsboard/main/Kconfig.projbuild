@@ -1,0 +1,26 @@
+menu "Example Configuration"
+
+    config BROKER_URL
+        string "Broker URL"
+        default "mqtt://mqtt.eclipseprojects.io"
+        help
+            URL of the broker to connect to
+
+    config BROKER_URL_FROM_STDIN
+        bool
+        default y if BROKER_URL = "FROM_STDIN"
+
+    config TB_PROVISION_KEY
+        string "ThingsBoard provision device key"
+        default "CHANGE_ME_PROVISION_KEY"
+        help
+            Shared across every device of this Device Profile (Profiles ->
+            Device profiles -> <profile> -> Device provisioning). Not a
+            per-device secret - it just lets a factory-fresh board register
+            itself and receive its own real access token automatically.
+
+    config TB_PROVISION_SECRET
+        string "ThingsBoard provision device secret"
+        default "CHANGE_ME_PROVISION_SECRET"
+
+endmenu

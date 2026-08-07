@@ -1,0 +1,1 @@
+rsource "drivers/sensor/mcp3221/Kconfig"
