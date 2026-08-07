@@ -3,8 +3,8 @@
 Estágio na Watgrid: avaliação de sistemas operativos/plataformas de firmware (Zephyr, ESP-IDF, Mongoose OS) e de plataformas de gestão de dispositivos na nuvem (ThingsBoard, ESP RainMaker, Azure IoT Hub + DPS) para o hardware ESP32.
 
 **Relatórios:**
-- [`relatorio.tex`](relatorio.tex) — relatório completo, com todo o processo de investigação e diagnóstico.
-- [`relatorioConciso.tex`](relatorioConciso.tex) — versão condensada, só com resultados e conclusões.
+- [`relatorio.pdf`](relatorio.pdf) — relatório completo, com todo o processo de investigação e diagnóstico.
+- [`relatorioConciso.pdf`](relatorioConciso.pdf) — versão condensada, só com resultados e conclusões.
 
 ## Camadas de firmware
 
